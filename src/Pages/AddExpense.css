@@ -1,0 +1,178 @@
+/* Outer container */
+.add-expense-container {
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* Background gradient */
+  background: linear-gradient(135deg, #ffecd2, #fcb69f, #ff9a9e);
+  font-family: "Poppins", sans-serif;
+  color: #333;
+}
+
+/* Title */
+.add-expense-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+/* Expense form box */
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: linear-gradient(135deg, #fff1eb, #ace0f9); /* pastel peach → aqua */
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  width: 350px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Inputs & dropdowns */
+.expense-form input,
+.expense-form select {
+  padding: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  background: #ffffffcc; /* slightly transparent white for blend */
+}
+
+.expense-form input:focus,
+.expense-form select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 6px rgba(102, 126, 234, 0.4);
+}
+
+/* Button */
+.expense-form button {
+  padding: 1rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.expense-form button:hover {
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+  box-shadow: 0 4px 12px rgba(44, 128, 180, 0.3);
+}
+
+/* Recent expenses box */
+.recent-expenses {
+  margin-top: 2rem;
+  background: linear-gradient(135deg, #e0c3fc, #8ec5fc); /* pastel purple → sky blue */
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  color: #2c3e50;
+  text-align: left;
+}
+
+/* Recent title */
+.recent-expenses h3 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+/* Expense item */
+.expense-item {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  background: #ffffffd9;
+  padding: 1rem;
+  border-radius: 16px; /* ✅ more rounded like cards */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease, background 0.3s ease;
+  animation: slideIn 0.4s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.expense-item:hover {
+  transform: translateX(4px);
+  background: #eef6fc;
+}
+
+/* Category Badge */
+.category-badge {
+  padding: 0.4rem 0.9rem;
+  border-radius: 50px; /* ✅ pill-shaped badge */
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  margin-left: 0.8rem;
+  text-transform: capitalize;
+}
+
+/* Category Colors */
+.category-food { background: linear-gradient(135deg, #ff9966, #ff5e62); }
+.category-travel { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
+.category-shopping { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+.category-bills { background: linear-gradient(135deg, #f85032, #e73827); }
+.category-entertainment { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.category-rent { background: linear-gradient(135deg, #434343, #000000); }
+
+/* ✅ Total Spent Box */
+.total-spent {
+  margin-top: 1.5rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.total-spent span {
+  font-weight: 700;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.category-breakdown {
+  margin-top: 20px;
+}
+
+.category-progress {
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  background: #e0e0e0;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #43cea2, #185a9d);
+  height: 100%;
+  border-radius: 8px;
+}

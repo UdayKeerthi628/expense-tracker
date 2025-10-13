@@ -1,0 +1,177 @@
+/* ===== Base Container ===== */
+.settings-container {
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  color: #fff;
+  transition: all 0.6s ease;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* ===== Animated Backgrounds ===== */
+.light-theme {
+  background: linear-gradient(135deg, #fdfbfb, #ebedee);
+  color: #2c3e50;
+}
+
+.dark-theme {
+  background: linear-gradient(-45deg, #232526, #414345, #141e30, #243b55);
+  background-size: 400% 400%;
+}
+
+.blue-theme {
+  background: linear-gradient(-45deg, #396afc, #2948ff, #1c92d2, #0f2027);
+  background-size: 400% 400%;
+}
+
+.purple-theme {
+  background: linear-gradient(-45deg, #7b4397, #9d50bb, #8e2de2, #4a00e0);
+  background-size: 400% 400%;
+}
+
+.green-theme {
+  background: linear-gradient(-45deg, #56ab2f, #a8e063, #11998e, #38ef7d);
+  background-size: 400% 400%;
+}
+
+.pink-theme {
+  background: linear-gradient(-45deg, #ff6a88, #ff99ac, #f857a6, #ff5858);
+  background-size: 400% 400%;
+}
+
+.orange-theme {
+  background: linear-gradient(-45deg, #f12711, #f5af19, #f7971e, #ff512f);
+  background-size: 400% 400%;
+}
+
+.aqua-theme {
+  background: linear-gradient(-45deg, #00c6ff, #0072ff, #36d1dc, #5b86e5);
+  background-size: 400% 400%;
+}
+
+.sunset-theme {
+  background: linear-gradient(-45deg, #ff9966, #ff5e62, #f46b45, #eea849);
+  background-size: 400% 400%;
+}
+
+.rainbow-theme {
+  background: linear-gradient(-45deg, red, orange, yellow, green, blue, indigo, violet);
+  background-size: 400% 400%;
+}
+
+/* Animate the gradient */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== Title ===== */
+.settings-container h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Card ===== */
+.settings-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeInUp 0.7s ease;
+}
+
+/* ===== Setting Item ===== */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* ===== Toggle Switch ===== */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 54px;
+  height: 28px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #7f8c8d;
+  transition: 0.4s;
+  border-radius: 28px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+input:checked + .slider {
+  background-color: #1abc9c;
+  box-shadow: 0 0 12px rgba(26, 188, 156, 0.6);
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* ===== Select Dropdown ===== */
+.setting-item select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+.setting-item select:focus { transform: scale(1.05); }
+
+/* ===== Save Button ===== */
+.save-btn {
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #16a085, #1abc9c);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+.save-btn:hover {
+  background: linear-gradient(135deg, #149174, #0f8a62);
+  transform: translateY(-2px);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* ===== Dark Mode Override ===== */
+.settings-container.dark {
+  color: #f1f1f1;
+}

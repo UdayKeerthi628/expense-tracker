@@ -1,0 +1,147 @@
+/* ===== Container ===== */
+.notifications-container {
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* Deep Navy → Teal gradient */
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background-size: 300% 300%;
+  animation: gradientShift 18s ease infinite;
+
+  font-family: "Poppins", sans-serif;
+  color: #ecf0f1;
+}
+
+/* ===== Title ===== */
+.notifications-container h2 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #1abc9c; /* teal accent */
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== Add Notification Buttons ===== */
+.notif-buttons {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.notif-buttons button {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notif-buttons button:hover {
+  transform: translateY(-2px);
+}
+
+/* Different button colors */
+.notif-buttons button:nth-child(1) { background: linear-gradient(135deg, #2ecc71, #27ae60); } /* success */
+.notif-buttons button:nth-child(2) { background: linear-gradient(135deg, #f1c40f, #f39c12); } /* warning */
+.notif-buttons button:nth-child(3) { background: linear-gradient(135deg, #e74c3c, #c0392b); } /* error */
+.notif-buttons button:nth-child(4) { background: linear-gradient(135deg, #3498db, #2980b9); } /* info */
+
+/* ===== Notification List ===== */
+.notif-list {
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.notif-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  animation: fadeInUp 0.6s ease;
+  transition: all 0.3s ease;
+}
+
+.notif-card:hover {
+  transform: translateX(6px);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Icon + text */
+.notif-icon {
+  font-size: 1.4rem;
+  margin-right: 0.8rem;
+}
+
+.notif-text {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Badge */
+.notif-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+/* ===== Card Variants ===== */
+.success { border-left: 6px solid #2ecc71; }
+.success .notif-badge { background: #27ae60; }
+
+.warning { border-left: 6px solid #f1c40f; }
+.warning .notif-badge { background: #f39c12; }
+
+.error { border-left: 6px solid #e74c3c; }
+.error .notif-badge { background: #c0392b; }
+
+.info { border-left: 6px solid #3498db; }
+.info .notif-badge { background: #2980b9; }
+
+/* ===== Clear All Button ===== */
+.clear-btn {
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #16a085, #1abc9c);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.clear-btn:hover {
+  background: linear-gradient(135deg, #149174, #0f8a62);
+  transform: scale(1.05);
+}
+
+/* ===== Animations ===== */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
