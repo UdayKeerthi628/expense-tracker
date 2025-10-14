@@ -5,12 +5,20 @@ export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
   // --------------------------
-  // Core states
+  // Core states with localStorage persistence
   // --------------------------
-  const [expenses, setExpenses] = useState([]);
-  const [incomes, setIncomes] = useState([]);
-  const [budgets, setBudgets] = useState([]);
-  const [savings, setSavings] = useState([]);
+  const [expenses, setExpenses] = useState(() => {
+    return JSON.parse(localStorage.getItem("expenses")) || [];
+  });
+  const [incomes, setIncomes] = useState(() => {
+    return JSON.parse(localStorage.getItem("incomes")) || [];
+  });
+  const [budgets, setBudgets] = useState(() => {
+    return JSON.parse(localStorage.getItem("budgets")) || [];
+  });
+  const [savings, setSavings] = useState(() => {
+    return JSON.parse(localStorage.getItem("savings")) || [];
+  });
   const [notifications, setNotifications] = useState([]);
   const [themeColor, setThemeColor] = useState("#0088FE");
 
@@ -22,7 +30,26 @@ export const GlobalProvider = ({ children }) => {
     return savedUser ? { username: savedUser } : null;
   });
 
-  // ✅ Sync user state with localStorage
+  // --------------------------
+  // Persist core states to localStorage
+  // --------------------------
+  useEffect(() => {
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+  }, [expenses]);
+
+  useEffect(() => {
+    localStorage.setItem("incomes", JSON.stringify(incomes));
+  }, [incomes]);
+
+  useEffect(() => {
+    localStorage.setItem("budgets", JSON.stringify(budgets));
+  }, [budgets]);
+
+  useEffect(() => {
+    localStorage.setItem("savings", JSON.stringify(savings));
+  }, [savings]);
+
+  // ✅ Persist user
   useEffect(() => {
     if (user?.username) {
       localStorage.setItem("loggedInUser", user.username);

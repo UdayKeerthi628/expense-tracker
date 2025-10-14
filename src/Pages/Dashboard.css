@@ -19,7 +19,6 @@
   box-shadow: 5px 0 20px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
-
 .logo {
   font-size: 1.8rem;
   font-weight: 700;
@@ -27,9 +26,12 @@
   text-align: center;
   letter-spacing: 1px;
   background: linear-gradient(90deg, #ff6a88, #43cea2);
+  background-clip: text;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-text-fill-color: transparent
+  ;
 }
+
 
 .sidebar nav {
   display: flex;
