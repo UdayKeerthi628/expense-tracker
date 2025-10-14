@@ -1,11 +1,11 @@
 // src/Pages/AddExpense.js
 import React, { useState, useContext } from "react";
-import { GlobalContext } from "./GlobalContext"; // ✅ use global context
+import { GlobalContext } from "./GlobalContext"; // ✅ corrected path
 import "./AddExpense.css";
 
 const AddExpense = () => {
   // ✅ Get global states & helpers from GlobalContext
-  const { expenses, addExpense } = useContext(GlobalContext);
+  const { expenses, addExpense, setNotifications } = useContext(GlobalContext);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -30,7 +30,11 @@ const AddExpense = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title || !formData.amount || !formData.category || !formData.date) {
-      alert("Please fill all fields");
+      // ✅ Use notifications instead of alert
+      setNotifications((prev) => [
+        ...prev,
+        { type: "error", message: "⚠️ Please fill all fields before adding expense." },
+      ]);
       return;
     }
 
@@ -40,6 +44,12 @@ const AddExpense = () => {
       ...formData,
       amount: Number(formData.amount),
     });
+
+    // ✅ Optionally add a notification
+    setNotifications((prev) => [
+      ...prev,
+      { type: "expense", message: `✅ Added expense: ${formData.title} - ₹${formData.amount}` },
+    ]);
 
     // ✅ Reset form
     setFormData({ title: "", amount: "", category: "", date: "" });

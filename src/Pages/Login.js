@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+// src/Pages/Login.js
+import React, { useState, useContext } from "react";
 import { FiMail, FiLock } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
+import { GlobalContext } from "./GlobalContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = useContext(GlobalContext); // ✅ get setUser from context
+
   const [identifier, setIdentifier] = useState(""); // email or username
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,6 +29,10 @@ const Login = () => {
     ) {
       setError("");
       localStorage.setItem("isLoggedIn", "true");
+
+      // ✅ update context user
+      setUser({ username: savedUser.username });
+
       navigate("/dashboard");
     } else {
       setError("Incorrect email/username or password ❌");
@@ -48,9 +56,7 @@ const Login = () => {
 
         <form onSubmit={handleLogin}>
           <div className="input-group">
-            <span className="input-icon">
-              <FiMail />
-            </span>
+            <span className="input-icon"><FiMail /></span>
             <input
               type="text"
               placeholder="Email or Username"
@@ -61,9 +67,7 @@ const Login = () => {
           </div>
 
           <div className="input-group">
-            <span className="input-icon">
-              <FiLock />
-            </span>
+            <span className="input-icon"><FiLock /></span>
             <input
               type="password"
               placeholder="Password"
@@ -73,9 +77,7 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="login-btn">
-            Login
-          </button>
+          <button type="submit" className="login-btn">Login</button>
         </form>
 
         <p className="signup-text">

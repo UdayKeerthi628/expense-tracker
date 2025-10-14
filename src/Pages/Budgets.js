@@ -1,6 +1,6 @@
 // src/pages/Budgets.js
-import React, { useState } from "react";
-import { useOutletContext } from "react-router-dom"; // ✅ Import global context
+import React, { useState, useContext } from "react";
+import { GlobalContext } from "./GlobalContext";
 import "./Budgets.css";
 import {
   PieChart,
@@ -16,18 +16,25 @@ import {
 } from "recharts";
 
 const Budgets = () => {
-  // ✅ Access global state
-  const { budgets, setBudgets, expenses, settings, addNotification } =
-    useOutletContext();
+  const { budgets, setBudgets, expenses, themeColor, setThemeColor } =
+    useContext(GlobalContext);
 
   const [category, setCategory] = useState("");
   const [limit, setLimit] = useState("");
+
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#B620E0",
+    "#FF4D6D",
+  ];
 
   const addBudget = (e) => {
     e.preventDefault();
     if (!category || !limit) return;
 
-    // ✅ Calculate spent dynamically from expenses
     const spent = expenses
       .filter((exp) => exp.category.toLowerCase() === category.toLowerCase())
       .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
@@ -41,20 +48,10 @@ const Budgets = () => {
 
     setBudgets([...budgets, newBudget]);
 
-    // ✅ Trigger notification if already over budget
-    if (spent > parseFloat(limit)) {
-      addNotification(
-        `⚠ ${category} budget exceeded by ${
-          settings.currency
-        }${spent - parseFloat(limit)}`
-      );
-    }
-
     setCategory("");
     setLimit("");
   };
 
-  // ✅ Emoji for categories
   const getCategoryEmoji = (cat) => {
     const map = {
       food: "🍔",
@@ -67,20 +64,20 @@ const Budgets = () => {
     return map[cat.toLowerCase()] || "💰";
   };
 
-  // ✅ Total spent across all budgets
   const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
-
-  // ✅ Find overspending category
   const overSpent = budgets.filter((b) => b.spent > b.limit);
 
-  // ✅ Chart Colors
-  const COLORS = [
+  // ===== Theme Picker =====
+  const availableThemes = [
     "#0088FE",
     "#00C49F",
     "#FFBB28",
     "#FF8042",
     "#B620E0",
     "#FF4D6D",
+    "#2E8B57",
+    "#FF6347",
+    "#FFD700",
   ];
 
   return (
@@ -108,6 +105,22 @@ const Budgets = () => {
         </button>
       </form>
 
+      {/* Theme Selector */}
+      <div className="theme-selector">
+        <h4>🎨 Pick Chart Theme:</h4>
+        {availableThemes.map((color, idx) => (
+          <span
+            key={idx}
+            className="color-swatch"
+            style={{
+              backgroundColor: color,
+              border: themeColor === color ? "3px solid black" : "1px solid #ccc",
+            }}
+            onClick={() => setThemeColor(color)}
+          ></span>
+        ))}
+      </div>
+
       {/* Recent Budgets */}
       <div className="recent-budgets">
         <h3>📊 Recent Budgets</h3>
@@ -123,32 +136,31 @@ const Budgets = () => {
             const remaining = budget.limit - budget.spent;
 
             return (
-              <div key={budget.id} className={`budget-item color-${index % 5}`}>
+              <div
+                key={budget.id}
+                className={`budget-item`}
+                style={{ borderColor: themeColor }}
+              >
                 <div className="budget-info">
                   <span className="budget-category">
                     {getCategoryEmoji(budget.category)} {budget.category}
                   </span>
                   <span className="budget-amount">
-                    {settings.currency}
-                    {budget.spent} / {settings.currency}
-                    {budget.limit}
+                    ₹{budget.spent} / ₹{budget.limit}
                   </span>
                 </div>
 
-                {/* Progress Bar (animated) */}
                 <div className="progress-bar">
                   <div
-                    className={`progress-fill ${
-                      isOverBudget ? "over" : "under"
-                    }`}
+                    className={`progress-fill ${isOverBudget ? "over" : "under"}`}
                     style={{
                       width: `${percentage}%`,
+                      backgroundColor: themeColor,
                       transition: "width 0.6s ease",
                     }}
                   ></div>
                 </div>
 
-                {/* Percentage + Warning */}
                 <span
                   className={`percentage ${
                     isOverBudget ? "over-text" : "under-text"
@@ -159,15 +171,14 @@ const Budgets = () => {
                     : `${Math.round(percentage)}% Used`}
                 </span>
 
-                {/* Remaining Balance */}
                 <div
                   className={`remaining ${
                     isOverBudget ? "remaining-over" : "remaining-ok"
                   }`}
                 >
                   {isOverBudget
-                    ? `Exceeded by ${settings.currency}${Math.abs(remaining)}`
-                    : `Remaining: ${settings.currency}${remaining}`}
+                    ? `Exceeded by ₹${Math.abs(remaining)}`
+                    : `Remaining: ₹${remaining}`}
                 </div>
               </div>
             );
@@ -181,29 +192,27 @@ const Budgets = () => {
           <p>
             📝 Total Planned:{" "}
             <span>
-              {settings.currency}
-              {budgets.reduce((total, b) => total + b.limit, 0)}
+              ₹{budgets.reduce((total, b) => total + b.limit, 0)}
             </span>
           </p>
           <p>
-            💸 Total Spent: <span>{settings.currency}{totalSpent}</span>
+            💸 Total Spent: <span>₹{totalSpent}</span>
           </p>
         </div>
       )}
 
-      {/* ⚠ Alert if any over budget */}
+      {/* Alert if over budget */}
       {overSpent.length > 0 && (
         <div className="alert-box">
           🚨 Warning: {overSpent.length} budget(s) exceeded!
         </div>
       )}
 
-      {/* ================== Charts ================== */}
+      {/* Charts */}
       {budgets.length > 0 && (
         <div className="charts-section">
           <h3>📈 Visual Reports</h3>
           <div className="charts-wrapper">
-            {/* Pie Chart - Spending Share */}
             <ResponsiveContainer width="50%" height={250}>
               <PieChart>
                 <Pie
@@ -218,7 +227,7 @@ const Budgets = () => {
                   {budgets.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={themeColor || COLORS[index % COLORS.length]}
                     />
                   ))}
                 </Pie>
@@ -226,14 +235,17 @@ const Budgets = () => {
               </PieChart>
             </ResponsiveContainer>
 
-            {/* Bar Chart - Limit vs Spent */}
             <ResponsiveContainer width="50%" height={250}>
               <BarChart data={budgets}>
                 <XAxis dataKey="category" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="limit" fill="#0088FE" name="Budget Limit" />
+                <Bar
+                  dataKey="limit"
+                  fill={themeColor || "#0088FE"}
+                  name="Budget Limit"
+                />
                 <Bar dataKey="spent" fill="#FF4D6D" name="Spent" />
               </BarChart>
             </ResponsiveContainer>

@@ -1,6 +1,6 @@
 // src/Pages/Dashboard.js
-import React, { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import React, { useContext } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FiHome,
   FiPlusCircle,
@@ -12,107 +12,102 @@ import {
   FiSettings,
 } from "react-icons/fi";
 import "./Dashboard.css";
-import UserMenu from "../Pages/UserMenu";
+import UserMenu from "./UserMenu";
+import { GlobalContext } from "./GlobalContext";
 
 const Dashboard = () => {
-  // Centralized states
-  const [expenses, setExpenses] = useState([]);
-  const [income, setIncome] = useState([]); // ✅ array, not number
-  const [budgets, setBudgets] = useState([]);
-  const [savings, setSavings] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(GlobalContext); // ✅ use context
 
-  // Helpers
-  const addExpense = (expense) => {
-    setExpenses((prev) => [...prev, expense]);
-    setNotifications((prev) => [
-      ...prev,
-      {
-        type: "warning",
-        message: `Expense added: ${expense.category} (₹${expense.amount})`,
-      },
-    ]);
+  // Active link check
+  const isActive = (path) => location.pathname === path;
+
+  // Capitalize first letter of username
+  const formattedName = user?.username
+    ? user.username.charAt(0).toUpperCase() + user.username.slice(1)
+    : "Guest";
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setUser(null); // ✅ clear context user
+    navigate("/login");
   };
-
-  const addIncome = (newIncome) => {
-    // ✅ expect {source, amount, date}
-    setIncome((prev) => [...prev, newIncome]);
-    setNotifications((prev) => [
-      ...prev,
-      {
-        type: "success",
-        message: `Income added: ${newIncome.source} (₹${newIncome.amount})`,
-      },
-    ]);
-  };
-
-  const addBudget = (budget) => {
-    setBudgets((prev) => [...prev, budget]);
-  };
-
-  const addSaving = (saving) => {
-    setSavings((prev) => [...prev, saving]);
-    setNotifications((prev) => [
-      ...prev,
-      {
-        type: "info",
-        message: `Saving added: ${saving.goal} (₹${saving.amount})`,
-      },
-    ]);
-  };
-
-  // ✅ Calculate totals
-  const totalIncome = income.reduce(
-    (acc, inc) => acc + parseFloat(inc.amount || 0),
-    0
-  );
-  const totalExpenses = expenses.reduce(
-    (acc, exp) => acc + parseFloat(exp.amount || 0),
-    0
-  );
-  const balance = totalIncome - totalExpenses;
 
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2 className="logo">💰 ExpenseTracker</h2>
+        <h2 className="logo">
+          💰 <span>Expense</span>Tracker
+        </h2>
         <nav>
-          <Link to="/dashboard" className="sidebar-link">
+          <Link
+            to="/dashboard"
+            className={`sidebar-link ${isActive("/dashboard") ? "active" : ""}`}
+          >
             <FiHome /> Dashboard
           </Link>
-          <Link to="/add-expense" className="sidebar-link">
+          <Link
+            to="/dashboard/add-expense"
+            className={`sidebar-link ${
+              isActive("/dashboard/add-expense") ? "active" : ""
+            }`}
+          >
             <FiPlusCircle /> Add Expense
           </Link>
-          <Link to="/income" className="sidebar-link">
+          <Link
+            to="/dashboard/income"
+            className={`sidebar-link ${isActive("/dashboard/income") ? "active" : ""}`}
+          >
             <FiDollarSign /> Income
           </Link>
-          <Link to="/budgets" className="sidebar-link">
+          <Link
+            to="/dashboard/budgets"
+            className={`sidebar-link ${
+              isActive("/dashboard/budgets") ? "active" : ""
+            }`}
+          >
             <FiClipboard /> Budgets
           </Link>
-          <Link to="/savings" className="sidebar-link">
+          <Link
+            to="/dashboard/savings"
+            className={`sidebar-link ${isActive("/dashboard/savings") ? "active" : ""}`}
+          >
             <FiDollarSign /> Savings
           </Link>
-          <Link to="/reports" className="sidebar-link">
+          <Link
+            to="/dashboard/reports"
+            className={`sidebar-link ${isActive("/dashboard/reports") ? "active" : ""}`}
+          >
             <FiBarChart2 /> Reports
           </Link>
-          <Link to="/notifications" className="sidebar-link">
+          <Link
+            to="/dashboard/notifications"
+            className={`sidebar-link ${isActive("/dashboard/notifications") ? "active" : ""}`}
+          >
             <FiBell /> Notifications
           </Link>
-          <Link to="/settings" className="sidebar-link">
+          <Link
+            to="/dashboard/settings"
+            className={`sidebar-link ${isActive("/dashboard/settings") ? "active" : ""}`}
+          >
             <FiSettings /> Settings
           </Link>
-          <Link to="/login" className="sidebar-link logout">
+          <button onClick={handleLogout} className="sidebar-link logout">
             <FiLogOut /> Logout
-          </Link>
+          </button>
         </nav>
       </aside>
 
-      {/* Main */}
+      {/* Main Content */}
       <main className="main-content">
         <header className="navbar">
           <div className="navbar-left">
-            <h3>Welcome back, Uday! 👋</h3>
+            <h3>
+              Welcome back, <span className="username">{formattedName}</span> 👋
+            </h3>
             <p>{new Date().toLocaleDateString()}</p>
           </div>
           <div className="navbar-right">
@@ -120,41 +115,48 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* ✅ Summary Section */}
-        <section className="summary-cards">
-          <div className="card">
-            <h4>Total Income</h4>
-            <p>₹{totalIncome}</p>
-          </div>
-          <div className="card">
-            <h4>Total Expenses</h4>
-            <p>₹{totalExpenses}</p>
-          </div>
-          <div className="card">
-            <h4>Balance</h4>
-            <p>₹{balance}</p>
-          </div>
-        </section>
+        {/* Show Welcome Section only on /dashboard */}
+        {location.pathname === "/dashboard" ? (
+          <div className="dashboard-welcome">
+            <h2 className="welcome-title">Track. Save. Grow. 🚀</h2>
+            <p className="welcome-subtitle">
+              Your all-in-one personal finance assistant to track expenses,
+              manage income, set budgets, grow savings, and analyze reports.
+            </p>
 
-        {/* Outlet with context */}
-        <Outlet
-          context={{
-            expenses,
-            setExpenses,
-            addExpense,
-            income,
-            setIncome,
-            addIncome,
-            budgets,
-            setBudgets,
-            addBudget,
-            savings,
-            setSavings,
-            addSaving,
-            notifications,
-            setNotifications,
-          }}
-        />
+            {/* Quick Actions */}
+            <div className="quick-actions">
+              <Link to="/dashboard/add-expense" className="action-btn primary">
+                ➕ Add Expense
+              </Link>
+              <Link to="/dashboard/reports" className="action-btn secondary">
+                📊 View Reports
+              </Link>
+            </div>
+
+            {/* Cards Section */}
+            <div className="dashboard-cards">
+              <div className="card animate">
+                <h3>💸 Expenses</h3>
+                <p>Stay on top of your spending habits and avoid overspending.</p>
+              </div>
+              <div className="card animate">
+                <h3>💰 Income</h3>
+                <p>Record your income sources and keep track of your monthly flow.</p>
+              </div>
+              <div className="card animate">
+                <h3>📊 Budgets</h3>
+                <p>Set smart budgets and achieve your financial goals faster.</p>
+              </div>
+              <div className="card animate">
+                <h3>🏦 Savings</h3>
+                <p>Build your savings steadily and secure your future.</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <Outlet />
+        )}
       </main>
     </div>
   );

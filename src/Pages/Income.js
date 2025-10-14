@@ -1,10 +1,11 @@
 // src/Pages/Income.js
 import React, { useState, useContext } from "react";
-import { GlobalContext } from "./GlobalContext"; // ✅ import global context
+import { GlobalContext } from "./GlobalContext"; // ✅ updated import path
 import "./Income.css";
 
 const Income = () => {
-  const { incomes = [], addIncome, setNotifications } = useContext(GlobalContext); // ✅ fallback to []
+  // ✅ Use GlobalContext instead of useOutletContext
+  const { incomes, addIncome, setNotifications } = useContext(GlobalContext);
 
   const [source, setSource] = useState("");
   const [amount, setAmount] = useState("");

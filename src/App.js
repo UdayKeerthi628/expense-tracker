@@ -27,13 +27,12 @@ function App() {
     <GlobalProvider>
       <Router>
         <Routes>
-        
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* ✅ Protected Routes */}
+          {/* ✅ Protected Routes under Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -41,63 +40,16 @@ function App() {
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/add-expense"
-            element={
-              <ProtectedRoute>
-                <AddExpense />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/income"
-            element={
-              <ProtectedRoute>
-                <Income />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/budgets"
-            element={
-              <ProtectedRoute>
-                <Budgets />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/savings"
-            element={
-              <ProtectedRoute>
-                <Savings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <ProtectedRoute>
-                <Reports />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <Notifications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
+          >
+            {/* Nested routes rendered inside Dashboard's <Outlet /> */}
+            <Route path="add-expense" element={<AddExpense />} />
+            <Route path="income" element={<Income />} />
+            <Route path="budgets" element={<Budgets />} />
+            <Route path="savings" element={<Savings />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
 
           {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
