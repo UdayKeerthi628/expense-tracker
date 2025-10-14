@@ -1,18 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
+import { GlobalContext } from "./GlobalContext";
 import "./Notifications.css";
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState([
-    { type: "success", message: "Income added successfully!" },
-    { type: "warning", message: "You are nearing your Food budget limit." },
-    { type: "error", message: "Overspent on Shopping category!" },
-    { type: "info", message: "New report is available for download." },
-  ]);
+  const { notifications, setNotifications } = useContext(GlobalContext);
 
-  const addNotification = (type, message) => {
-    setNotifications([{ type, message }, ...notifications]);
-  };
-
+  // Clear all notifications
   const clearAll = () => {
     setNotifications([]);
   };
@@ -20,22 +13,6 @@ const Notifications = () => {
   return (
     <div className="notifications-container">
       <h2>🔔 Notifications</h2>
-
-      {/* Add new notification buttons */}
-      <div className="notif-buttons">
-        <button onClick={() => addNotification("success", "Income saved!")}>
-          + Success
-        </button>
-        <button onClick={() => addNotification("warning", "Budget running low!")}>
-          + Warning
-        </button>
-        <button onClick={() => addNotification("error", "Overspent detected!")}>
-          + Error
-        </button>
-        <button onClick={() => addNotification("info", "New update available.")}>
-          + Info
-        </button>
-      </div>
 
       {/* Notifications List */}
       <div className="notif-list">

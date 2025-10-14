@@ -13,6 +13,7 @@ import {
   YAxis,
   Legend,
   ResponsiveContainer,
+  LabelList,
 } from "recharts";
 
 const Reports = () => {
@@ -24,8 +25,22 @@ const Reports = () => {
   const totalSavings = savings.reduce((sum, s) => sum + parseFloat(s.savedAmount || 0), 0);
   const totalBudgets = budgets.reduce((sum, b) => sum + parseFloat(b.limit || 0), 0);
 
-  // Colors for pie charts
+  // Colors
   const COLORS = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#1A535C", "#FF9F1C", "#6A4C93"];
+
+  // Handle empty datasets
+  const emptyData = [{ name: "No Data", value: 1 }];
+
+  // Calculate percentage spent for each budget
+  const budgetsWithPercent = budgets.map((b) => ({
+    ...b,
+    percentSpent: b.limit ? Math.min(((b.spent / b.limit) * 100).toFixed(1), 100) : 0,
+  }));
+
+  // Add `total` to Pie data for percentage calculation
+  const expensesData = expenses.length > 0 ? expenses.map(e => ({ ...e, total: totalExpenses })) : emptyData;
+  const incomesData = incomes.length > 0 ? incomes.map(i => ({ ...i, total: totalIncome })) : emptyData;
+  const savingsData = savings.length > 0 ? savings.map(s => ({ ...s, total: totalSavings })) : emptyData;
 
   return (
     <div className="reports-container">
@@ -34,53 +49,50 @@ const Reports = () => {
 
       {/* Summary Cards */}
       <div className="summary-cards">
-        <div className="card expenses-card">
-          💸 Expenses: ₹{totalExpenses}
-        </div>
-        <div className="card income-card">
-          💰 Income: ₹{totalIncome}
-        </div>
-        <div className="card budget-card">
-          📋 Budgets: ₹{totalBudgets}
-        </div>
-        <div className="card savings-card">
-          🏦 Savings: ₹{totalSavings}
-        </div>
+        <div className="card expenses-card">💸 Expenses: ₹{totalExpenses}</div>
+        <div className="card income-card">💰 Income: ₹{totalIncome}</div>
+        <div className="card budget-card">📋 Budgets: ₹{totalBudgets}</div>
+        <div className="card savings-card">🏦 Savings: ₹{totalSavings}</div>
       </div>
 
       {/* Charts */}
       <div className="charts-section">
         <h3>📈 Charts</h3>
+
         <div className="charts-wrapper">
           {/* Expenses Pie Chart */}
           <ResponsiveContainer width="50%" height={250}>
             <PieChart>
               <Pie
-                data={expenses}
+                data={expensesData}
                 dataKey="amount"
                 nameKey="title"
                 cx="50%"
                 cy="50%"
                 outerRadius={90}
-                label
+                label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
               >
-                {expenses.map((entry, index) => (
+                {expensesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value) => `₹${value}`} />
             </PieChart>
           </ResponsiveContainer>
 
           {/* Budgets vs Spent Bar Chart */}
           <ResponsiveContainer width="50%" height={250}>
-            <BarChart data={budgets}>
+            <BarChart
+              data={budgetsWithPercent.length > 0 ? budgetsWithPercent : [{ category: "No Data", limit: 0, spent: 0, percentSpent: 0 }]}
+            >
               <XAxis dataKey="category" />
               <YAxis />
-              <Tooltip />
+              <Tooltip formatter={(value, name) => [`₹${value}`, name]} />
               <Legend />
               <Bar dataKey="limit" fill="#4ECDC4" name="Budget Limit" />
-              <Bar dataKey="spent" fill={themeColor} name="Spent" />
+              <Bar dataKey="spent" fill={themeColor} name="Spent">
+                <LabelList dataKey="percentSpent" position="top" formatter={(val) => `${val}%`} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -90,19 +102,19 @@ const Reports = () => {
           <ResponsiveContainer width="50%" height={250}>
             <PieChart>
               <Pie
-                data={incomes}
+                data={incomesData}
                 dataKey="amount"
                 nameKey="source"
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label
+                label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
               >
-                {incomes.map((entry, index) => (
+                {incomesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value) => `₹${value}`} />
             </PieChart>
           </ResponsiveContainer>
 
@@ -110,19 +122,19 @@ const Reports = () => {
           <ResponsiveContainer width="50%" height={250}>
             <PieChart>
               <Pie
-                data={savings}
+                data={savingsData}
                 dataKey="savedAmount"
                 nameKey="goal"
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label
+                label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
               >
-                {savings.map((entry, index) => (
+                {savingsData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value) => `₹${value}`} />
             </PieChart>
           </ResponsiveContainer>
         </div>

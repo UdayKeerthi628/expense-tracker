@@ -1,70 +1,142 @@
+/* =========================
+   Reports Page Container
+   ========================= */
 .reports-container {
+  padding: 3rem 2rem;
+  background: linear-gradient(145deg, #d4f7d8, #b0f0f7);
   min-height: 100vh;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  background: linear-gradient(135deg, #d4fc79, #96e6a1); /* green gradient */
+  text-align: center;
+  color: #222;
   font-family: "Poppins", sans-serif;
-  color: #333;
+  transition: background 0.3s ease;
 }
 
+/* =========================
+   Title and Subtitle
+   ========================= */
 .reports-container h2 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
+  color: #111;
   margin-bottom: 0.5rem;
-  color: #2c3e50;
 }
 
 .subtitle {
-  margin-bottom: 2rem;
-  font-size: 1rem;
-  color: #555;
-}
-
-/* Chart box */
-.chart-container {
-  width: 100%;
-  max-width: 600px;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  margin-bottom: 2rem;
-}
-
-/* Report cards */
-.report-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  width: 100%;
-  max-width: 800px;
-}
-
-.report-card {
-  background: #ffffffcc;
-  padding: 1rem;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.report-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-.report-card h4 {
-  font-size: 1rem;
-  margin-bottom: 0.3rem;
-  color: #2c3e50;
-}
-
-.report-card p {
   font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 2.5rem;
+  line-height: 1.4;
+}
+
+/* =========================
+   Summary Cards
+   ========================= */
+.summary-cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.card {
+  padding: 2rem 2.5rem;
+  border-radius: 20px;
   font-weight: 600;
-  color: #667eea;
+  font-size: 1.2rem;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  width: 200px;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.3s ease;
+  cursor: default;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+  filter: brightness(1.1);
+}
+
+/* Card gradients */
+.expenses-card {
+  background: linear-gradient(135deg, #ff6b6b, #ff9472);
+}
+
+.income-card {
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+}
+
+.budget-card {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.savings-card {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+}
+
+/* =========================
+   Charts Section
+   ========================= */
+.charts-section {
+  margin-top: 3rem;
+}
+
+.charts-section h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #222;
+}
+
+/* Charts Wrapper using CSS Grid */
+.charts-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Individual Chart Card */
+.recharts-wrapper {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recharts-wrapper:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================
+   Responsive Adjustments
+   ========================= */
+@media (max-width: 1024px) {
+  .summary-cards {
+    gap: 1.5rem;
+  }
+  
+  .card {
+    width: 180px;
+    font-size: 1.1rem;
+    padding: 1.8rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    gap: 1rem;
+  }
+
+  .card {
+    width: 160px;
+    font-size: 1rem;
+    padding: 1.5rem 2rem;
+  }
+
+  .charts-wrapper {
+    grid-template-columns: 1fr; /* single column on small screens */
+  }
 }
