@@ -23,12 +23,21 @@ export const GlobalProvider = ({ children }) => {
   const [themeColor, setThemeColor] = useState("#0088FE");
 
   // --------------------------
-  // User state
+  // ✅ User state (fully stored into localStorage)
   // --------------------------
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("loggedInUser");
-    return savedUser ? { username: savedUser } : null;
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
   });
+
+  // ✅ Persist user
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
 
   // --------------------------
   // Persist core states to localStorage
@@ -49,15 +58,6 @@ export const GlobalProvider = ({ children }) => {
     localStorage.setItem("savings", JSON.stringify(savings));
   }, [savings]);
 
-  // ✅ Persist user
-  useEffect(() => {
-    if (user?.username) {
-      localStorage.setItem("loggedInUser", user.username);
-    } else {
-      localStorage.removeItem("loggedInUser");
-    }
-  }, [user]);
-
   // --------------------------
   // Expense Management
   // --------------------------
@@ -70,6 +70,7 @@ export const GlobalProvider = ({ children }) => {
 
     if (relatedBudget) {
       const newSpent = relatedBudget.spent + parseFloat(expense.amount || 0);
+
       if (newSpent > relatedBudget.limit) {
         setNotifications((prev) => [
           ...prev,
@@ -141,6 +142,7 @@ export const GlobalProvider = ({ children }) => {
 
   const addMoneyToSaving = (id, amount) => {
     if (!amount) return;
+
     setSavings((prev) =>
       prev.map((s) =>
         s.id === id
@@ -155,37 +157,26 @@ export const GlobalProvider = ({ children }) => {
     ]);
   };
 
-  // --------------------------
-  // GlobalContext Provider
-  // --------------------------
   return (
     <GlobalContext.Provider
       value={{
-        // Core States
         expenses,
         setExpenses,
         addExpense,
-
         incomes,
         setIncomes,
         addIncome,
-
         budgets,
         setBudgets,
         addBudget,
-
         savings,
         setSavings,
         addSaving,
         addMoneyToSaving,
-
         notifications,
         setNotifications,
-
         themeColor,
         setThemeColor,
-
-        // ✅ User State
         user,
         setUser,
       }}

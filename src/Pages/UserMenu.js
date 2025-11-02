@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiUser, FiLogOut } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
-import "./UserMenu.css"; // we'll add simple styles
+import "./UserMenu.css";
 
 const UserMenu = () => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
   const navigate = useNavigate();
 
-  // Close dropdown when clicking outside
+  // Close dropdown outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -16,13 +16,11 @@ const UserMenu = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = () => {
-    // Clear user session here if needed
+    localStorage.removeItem("loggedInUser");
     navigate("/login");
   };
 
@@ -31,11 +29,14 @@ const UserMenu = () => {
       <div className="avatar" onClick={() => setOpen(!open)}>
         <FiUser size={20} />
       </div>
+
       {open && (
         <div className="dropdown">
-          <Link to="/profile" className="dropdown-item">
+          {/* ✅ Correct Profile Path */}
+          <Link to="/dashboard/profile" className="dropdown-item">
             <FiUser /> Profile
           </Link>
+
           <button className="dropdown-item" onClick={handleLogout}>
             <FiLogOut /> Logout
           </button>

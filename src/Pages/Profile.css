@@ -1,60 +1,135 @@
-/* src/Pages/Profile.css */
-
-/* Full page background */
+/* full page */
 .profile-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea, #764ba2); /* purple-blue gradient */
-  font-family: "Poppins", sans-serif;
   padding: 20px;
-  color: #fff;
+  color: #2a2a2a;
+  background: linear-gradient(135deg, #a1ffce, #faffd1, #8ec5fc, #e0c3fc);
+  font-family: "Poppins", sans-serif;
 }
 
-/* Profile Card */
-.profile-card {
-  background: rgba(255, 255, 255, 0.15); /* transparent glass look */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 30px 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  max-width: 380px;
-  width: 100%;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Hover effect for highlight */
-.profile-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-}
-
-/* Profile avatar */
-.profile-avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: #fff;
-  color: #764ba2;
+/* BACK BUTTON */
+.back-btn {
+  border: none;
+  background: transparent;
+  color: #4a4a4a;
+  font-size: 16px;
+  margin: 10px 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-  margin: 0 auto 20px auto;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Profile info text */
-.profile-card p {
-  margin: 10px 0;
-  font-size: 16px;
+/* card */
+.profile-card {
+  width: 90%;
+  max-width: 420px;
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+  animation: pop 0.3s ease-out;
 }
 
-.profile-card strong {
-  color: #ffd700; /* highlight labels in gold */
+/* avatar wrapper */
+.profile-avatar-wrapper {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+/* avatar */
+.profile-avatar {
+  height: 90px;
+  width: 90px;
+  border-radius: 50%;
+  border: 3px solid #7b61ff;
+  object-fit: cover;
+  box-shadow: 0 0 10px #b192ff;
+}
+
+/* edit avatar */
+.edit-avatar {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #7b61ff;
+  color: white;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  font-size: 12px;
+}
+
+/* fields */
+.profile-fields label {
+  font-weight: 600;
+  margin-top: 10px;
+  color: #333;
+}
+
+.profile-fields input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255,255,255,0.45);
+  border: none;
+  border-radius: 8px;
+  margin-top: 5px;
+  color: #2b2b2b;
+  outline: none;
+}
+
+/* password section */
+.password-section {
+  margin: 15px 0;
+}
+
+/* primary button */
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6dd5ed, #2193b0);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 10px;
+  transition: 0.25s;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* outline button */
+.outline-btn {
+  background: transparent;
+  border: 2px solid #7b61ff;
+  color: #7b61ff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.outline-btn:hover {
+  background: #7b61ff;
+  color: white;
+}
+
+/* animation */
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

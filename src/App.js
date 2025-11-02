@@ -13,12 +13,13 @@ import Notifications from "./Pages/Notifications";
 import Settings from "./Pages/Settings";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
+import Profile from "./Pages/Profile";   // ✅
 
 import { GlobalProvider } from "./Pages/GlobalContext";
 
-// ✅ Protected Route Component
+// ✅ Protected Route
 const ProtectedRoute = ({ children }) => {
-  const user = localStorage.getItem("user");
+  const user = localStorage.getItem("loggedInUser");
   return user ? children : <Navigate to="/login" replace />;
 };
 
@@ -32,7 +33,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* ✅ Protected Routes under Dashboard */}
+          {/* Protected */}
           <Route
             path="/dashboard"
             element={
@@ -41,7 +42,6 @@ function App() {
               </ProtectedRoute>
             }
           >
-            {/* Nested routes rendered inside Dashboard's <Outlet /> */}
             <Route path="add-expense" element={<AddExpense />} />
             <Route path="income" element={<Income />} />
             <Route path="budgets" element={<Budgets />} />
@@ -49,9 +49,12 @@ function App() {
             <Route path="reports" element={<Reports />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="settings" element={<Settings />} />
+
+            {/* ✅ ADD THIS */}
+            <Route path="profile" element={<Profile />} />
           </Route>
 
-          {/* Fallback Route */}
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
