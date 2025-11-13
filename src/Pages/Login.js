@@ -1,4 +1,3 @@
-// src/Pages/Login.js
 import React, { useState, useContext } from "react";
 import { FiMail, FiLock } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,35 +6,51 @@ import { GlobalContext } from "./GlobalContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = useContext(GlobalContext); // ✅ get setUser from context
+  const { setUser } = useContext(GlobalContext);
 
-  const [identifier, setIdentifier] = useState(""); // email or username
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const savedUser = JSON.parse(localStorage.getItem("user"));
+    try {
+      const response = await fetch("http://localhost:8080/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: identifier,
+          password: password,
+        }),
+      });
 
-    if (!savedUser) {
-      setError("No user found. Please sign up first.");
-      return;
-    }
+      const text = await response.text();
 
-    if (
-      (identifier === savedUser.email || identifier === savedUser.username) &&
-      password === savedUser.password
-    ) {
-      setError("");
-      localStorage.setItem("isLoggedIn", "true");
+      if (response.ok && text === "Login successful") {
+        alert("Login successful ✅");
 
-      // ✅ update context user
-      setUser({ username: savedUser.username });
+        // ✅ Create user object
+        const username = identifier.split("@")[0];
+        const userData = { username, email: identifier, id: identifier };
 
-      navigate("/dashboard");
-    } else {
-      setError("Incorrect email/username or password ❌");
+        // ✅ Save login info
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        // ✅ Record last logged-in user (important for clearing old data)
+        localStorage.setItem("lastUser", identifier);
+
+        // ✅ Update context and navigate
+        setUser(userData);
+        navigate("/dashboard");
+      } else {
+        setError(text || "Invalid email or password ❌");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Something went wrong. Please try again later ❌");
     }
   };
 
@@ -58,8 +73,8 @@ const Login = () => {
           <div className="input-group">
             <span className="input-icon"><FiMail /></span>
             <input
-              type="text"
-              placeholder="Email or Username"
+              type="email"
+              placeholder="Email"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required

@@ -19,11 +19,14 @@ import {
 const Reports = () => {
   const { expenses, budgets, incomes, savings, themeColor } = useContext(GlobalContext);
 
+  // Helper to ensure numeric values
+  const safeNumber = (val) => (isNaN(parseFloat(val)) ? 0 : parseFloat(val));
+
   // Totals
-  const totalExpenses = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
-  const totalIncome = incomes.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
-  const totalSavings = savings.reduce((sum, s) => sum + parseFloat(s.savedAmount || 0), 0);
-  const totalBudgets = budgets.reduce((sum, b) => sum + parseFloat(b.limit || 0), 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + safeNumber(e.amount), 0);
+  const totalIncome = incomes.reduce((sum, i) => sum + safeNumber(i.amount), 0);
+  const totalSavings = savings.reduce((sum, s) => sum + safeNumber(s.savedAmount), 0);
+  const totalBudgets = budgets.reduce((sum, b) => sum + safeNumber(b.limit), 0);
 
   // Colors
   const COLORS = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#1A535C", "#FF9F1C", "#6A4C93"];
@@ -83,9 +86,13 @@ const Reports = () => {
           {/* Budgets vs Spent Bar Chart */}
           <ResponsiveContainer width="50%" height={250}>
             <BarChart
-              data={budgetsWithPercent.length > 0 ? budgetsWithPercent : [{ category: "No Data", limit: 0, spent: 0, percentSpent: 0 }]}
+              data={
+                budgetsWithPercent.length > 0
+                  ? budgetsWithPercent
+                  : [{ category: "No Data", limit: 0, spent: 0, percentSpent: 0 }]
+              }
             >
-              <XAxis dataKey="category" />
+              <XAxis dataKey={(b) => b.category || b.name || "Budget"} />
               <YAxis />
               <Tooltip formatter={(value, name) => [`₹${value}`, name]} />
               <Legend />

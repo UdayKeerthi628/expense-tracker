@@ -1,5 +1,5 @@
-// src/Pages/Settings.js
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
+import { GlobalContext } from "./GlobalContext";
 import "./Settings.css";
 
 const themes = [
@@ -16,22 +16,11 @@ const themes = [
 ];
 
 const Settings = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [theme, setTheme] = useState("light");
+  const { theme, setTheme, darkMode, setDarkMode } = useContext(GlobalContext);
 
-  // Load saved settings
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const savedDarkMode = localStorage.getItem("darkMode") === "true";
-    if (savedTheme) setTheme(savedTheme);
-    setDarkMode(savedDarkMode);
-  }, []);
-
-  // Save settings whenever changed
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-    localStorage.setItem("darkMode", darkMode);
-  }, [theme, darkMode]);
+  const saveSettings = () => {
+    alert("✅ Settings saved successfully!");
+  };
 
   return (
     <div className={`settings-container ${theme}-theme ${darkMode ? "dark" : ""}`}>
@@ -63,10 +52,7 @@ const Settings = () => {
           </select>
         </div>
 
-        <button
-          className="save-btn"
-          onClick={() => alert("✅ Settings saved successfully!")}
-        >
+        <button className="save-btn" onClick={saveSettings}>
           Save Settings
         </button>
       </div>

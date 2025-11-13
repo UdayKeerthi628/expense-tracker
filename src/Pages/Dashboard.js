@@ -1,5 +1,5 @@
 // src/Pages/Dashboard.js
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FiHome,
@@ -18,12 +18,20 @@ import { GlobalContext } from "./GlobalContext";
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, setUser } = useContext(GlobalContext); // ✅ use context
+  const { user, setUser } = useContext(GlobalContext);
+
+  // ✅ Load user info from localStorage when page refreshes
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, [setUser]);
 
   // Active link check
   const isActive = (path) => location.pathname === path;
 
-  // Capitalize first letter of username
+  // ✅ Properly format name
   const formattedName = user?.username
     ? user.username.charAt(0).toUpperCase() + user.username.slice(1)
     : "Guest";
@@ -31,7 +39,8 @@ const Dashboard = () => {
   // Logout handler
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
-    setUser(null); // ✅ clear context user
+    localStorage.removeItem("user");
+    setUser(null);
     navigate("/login");
   };
 
@@ -59,7 +68,9 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/dashboard/income"
-            className={`sidebar-link ${isActive("/dashboard/income") ? "active" : ""}`}
+            className={`sidebar-link ${
+              isActive("/dashboard/income") ? "active" : ""
+            }`}
           >
             <FiDollarSign /> Income
           </Link>
@@ -73,25 +84,33 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/dashboard/savings"
-            className={`sidebar-link ${isActive("/dashboard/savings") ? "active" : ""}`}
+            className={`sidebar-link ${
+              isActive("/dashboard/savings") ? "active" : ""
+            }`}
           >
             <FiDollarSign /> Savings
           </Link>
           <Link
             to="/dashboard/reports"
-            className={`sidebar-link ${isActive("/dashboard/reports") ? "active" : ""}`}
+            className={`sidebar-link ${
+              isActive("/dashboard/reports") ? "active" : ""
+            }`}
           >
             <FiBarChart2 /> Reports
           </Link>
           <Link
             to="/dashboard/notifications"
-            className={`sidebar-link ${isActive("/dashboard/notifications") ? "active" : ""}`}
+            className={`sidebar-link ${
+              isActive("/dashboard/notifications") ? "active" : ""
+            }`}
           >
             <FiBell /> Notifications
           </Link>
           <Link
             to="/dashboard/settings"
-            className={`sidebar-link ${isActive("/dashboard/settings") ? "active" : ""}`}
+            className={`sidebar-link ${
+              isActive("/dashboard/settings") ? "active" : ""
+            }`}
           >
             <FiSettings /> Settings
           </Link>

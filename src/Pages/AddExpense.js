@@ -1,11 +1,10 @@
-// src/Pages/AddExpense.js
-import React, { useState, useContext } from "react";
-import { GlobalContext } from "./GlobalContext"; // ✅ corrected path
+import React, { useState, useContext, useEffect } from "react";
+import { GlobalContext } from "./GlobalContext";
 import "./AddExpense.css";
 
 const AddExpense = () => {
-  // ✅ Get global states & helpers from GlobalContext
-  const { expenses, addExpense, setNotifications } = useContext(GlobalContext);
+  const { expenses, setExpenses, addExpense, setNotifications, user } =
+    useContext(GlobalContext);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -23,53 +22,106 @@ const AddExpense = () => {
     { label: "🏠 Rent", value: "rent" },
   ];
 
+  // ✅ Load user's expenses from backend when component mounts
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        const userId = user?.id || "test-user"; // fallback for testing
+        const response = await fetch(
+          `http://localhost:8080/api/expenses?userId=${userId}`
+        );
+
+        if (!response.ok) throw new Error("Failed to load expenses");
+
+        const data = await response.json();
+        setExpenses(data);
+        console.log("✅ Loaded expenses from backend:", data);
+      } catch (error) {
+        console.error("❌ Error loading expenses:", error);
+      }
+    };
+
+    fetchExpenses();
+  }, [user, setExpenses]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // ✅ Save new expense to backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.amount || !formData.category || !formData.date) {
-      // ✅ Use notifications instead of alert
+
+    if (
+      !formData.title ||
+      !formData.amount ||
+      !formData.category ||
+      !formData.date
+    ) {
       setNotifications((prev) => [
         ...prev,
-        { type: "error", message: "⚠️ Please fill all fields before adding expense." },
+        { type: "error", message: "⚠️ Please fill all fields." },
       ]);
       return;
     }
 
-    // ✅ Save to global state
-    addExpense({
-      id: Date.now(),
-      ...formData,
-      amount: Number(formData.amount),
-    });
+    try {
+      const userId = user?.id || "test-user"; // temporary static ID for now
 
-    // ✅ Optionally add a notification
-    setNotifications((prev) => [
-      ...prev,
-      { type: "expense", message: `✅ Added expense: ${formData.title} - ₹${formData.amount}` },
-    ]);
+      const response = await fetch("http://localhost:8080/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.title,
+          amount: Number(formData.amount),
+          category: formData.category,
+          date: formData.date,
+          userId,
+        }),
+      });
 
-    // ✅ Reset form
-    setFormData({ title: "", amount: "", category: "", date: "" });
+      if (!response.ok) throw new Error("Failed to save expense");
+
+      const saved = await response.json();
+      console.log("✅ Saved to backend:", saved);
+
+      addExpense(saved);
+
+      setNotifications((prev) => [
+        ...prev,
+        {
+          type: "success",
+          message: `✅ Added: ${saved.title} - ₹${saved.amount}`,
+        },
+      ]);
+
+      setFormData({
+        title: "",
+        amount: "",
+        category: "",
+        date: "",
+      });
+    } catch (error) {
+      console.error("❌ Error saving expense:", error);
+      setNotifications((prev) => [
+        ...prev,
+        { type: "error", message: "❌ Failed to save expense." },
+      ]);
+    }
   };
 
-  // ✅ Calculate total spent overall
   const totalSpent = expenses.reduce(
-    (acc, exp) => acc + parseFloat(exp.amount || 0),
+    (acc, exp) => acc + Number(exp.amount || 0),
     0
   );
 
-  // ✅ Calculate per-category totals
   const categoryTotals = categories.map((cat) => {
     const total = expenses
       .filter((exp) => exp.category === cat.value)
-      .reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0);
+      .reduce((acc, exp) => acc + Number(exp.amount || 0), 0);
     return { ...cat, total };
   });
 
-  // ✅ Get emoji for category
   const getCategoryEmoji = (value) => {
     const category = categories.find((cat) => cat.value === value);
     return category ? category.label.split(" ")[0] : "";
@@ -78,6 +130,7 @@ const AddExpense = () => {
   return (
     <div className="add-expense-container">
       <h2>Add New Expense</h2>
+
       <form onSubmit={handleSubmit} className="expense-form">
         <input
           type="text"
@@ -86,6 +139,7 @@ const AddExpense = () => {
           value={formData.title}
           onChange={handleChange}
         />
+
         <input
           type="number"
           name="amount"
@@ -93,6 +147,7 @@ const AddExpense = () => {
           value={formData.amount}
           onChange={handleChange}
         />
+
         <select
           name="category"
           value={formData.category}
@@ -105,18 +160,20 @@ const AddExpense = () => {
             </option>
           ))}
         </select>
+
         <input
           type="date"
           name="date"
           value={formData.date}
           onChange={handleChange}
         />
+
         <button type="submit">+ Add Expense</button>
       </form>
 
-      {/* ✅ Recent Expenses */}
       <div className="recent-expenses">
         <h3>Recent Expenses</h3>
+
         {expenses.length === 0 ? (
           <p>No expenses added yet.</p>
         ) : (
@@ -138,14 +195,12 @@ const AddExpense = () => {
         )}
       </div>
 
-      {/* ✅ Total Spent */}
       {expenses.length > 0 && (
         <div className="total-spent">
           💰 Total Spent: <span>₹{totalSpent}</span>
         </div>
       )}
 
-      {/* ✅ Category Breakdown */}
       {expenses.length > 0 && (
         <div className="category-breakdown">
           <h3>Spending by Category</h3>

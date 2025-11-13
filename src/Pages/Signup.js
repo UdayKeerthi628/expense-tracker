@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { FiMail, FiLock, FiUser } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";   // ✅ Import navigate
+import { useNavigate } from "react-router-dom";
 import "./Signup.css";
 
 const Signup = () => {
-  const navigate = useNavigate();  // ✅ Hook for navigation
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -17,10 +17,10 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Basic validation
     if (!formData.username || !formData.email || !formData.password) {
       setError("All fields are required.");
       return;
@@ -30,21 +30,29 @@ const Signup = () => {
       return;
     }
 
-    // ✅ Save user in localStorage (Frontend only)
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-      })
-    );
+    try {
+      const res = await fetch("http://localhost:8080/api/users/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-    setError("");
-    console.log("Signup successful 🎉:", formData);
+      const text = await res.text();
 
-    // ✅ Redirect directly to dashboard
-    navigate("/dashboard");
+      if (res.ok && text === "Signup successful") {
+        alert("Signup successful ✅");
+        navigate("/login");
+      } else {
+        setError(text || "Signup failed. Try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Try again later.");
+    }
   };
 
   return (
