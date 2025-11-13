@@ -4,9 +4,7 @@ import React, { createContext, useState, useEffect } from "react";
 export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-  // --------------------------
-  // 🔹 Core states
-  // --------------------------
+
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
   const [budgets, setBudgets] = useState([]);
@@ -15,86 +13,65 @@ export const GlobalProvider = ({ children }) => {
   const [themeColor, setThemeColor] = useState("#0088FE");
 
   // --------------------------
-  // 🔹 User state (persisted in localStorage)
+  // 🔹 User Persistence
   // --------------------------
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
   });
 
-  // ✅ Persist user data changes
   useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-    } else {
-      localStorage.removeItem("user");
-    }
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    else localStorage.removeItem("user");
   }, [user]);
 
   // --------------------------
-  // 🔹 Clear old data when a different user logs in
+  // 🔹 Clear data ONLY when a DIFFERENT user logs in
   // --------------------------
   useEffect(() => {
     const lastUser = localStorage.getItem("lastUser");
-    const currentUser =
-      user?.email || user?.username || user?.name || user?.id || null;
+    const currentUser = user?.email;
 
     if (currentUser && lastUser && lastUser !== currentUser) {
-      // 🧹 New user logged in → clear all user-specific data
       setExpenses([]);
       setIncomes([]);
       setBudgets([]);
       setSavings([]);
-
-      localStorage.removeItem("expenses");
-      localStorage.removeItem("incomes");
-      localStorage.removeItem("budgets");
-      localStorage.removeItem("savings");
-
-      setNotifications([
-        { type: "info", message: `👋 Welcome ${user.username || "User"}!` },
-      ]);
     }
 
-    if (currentUser) {
-      localStorage.setItem("lastUser", currentUser);
-    }
+    if (currentUser) localStorage.setItem("lastUser", currentUser);
   }, [user]);
 
   // --------------------------
-  // 🔹 Load user data from backend after login
+  // 🔥 Load data correctly (MATCHES BACKEND)
   // --------------------------
   useEffect(() => {
+    if (!user?.email) return;
+
+    const email = user.email;
+
     const loadData = async () => {
-      if (!user) return;
-      const userId = user.id || user.email || user.username;
-
       try {
-        const [expRes, incRes, budRes, savRes] = await Promise.all([
-          fetch(`http://localhost:8080/api/expenses?userId=${userId}`),
-          fetch(`http://localhost:8080/api/incomes?userId=${userId}`),
-          fetch(`http://localhost:8080/api/budgets?userId=${userId}`),
-          fetch(`http://localhost:8080/api/savings?userId=${userId}`),
+        const [expR, incR, budR, savR] = await Promise.all([
+          fetch(`http://localhost:8080/api/expenses/user/${email}`),
+          fetch(`http://localhost:8080/api/incomes/user/${email}`),
+          fetch(`http://localhost:8080/api/budgets/user/${email}`),
+          fetch(`http://localhost:8080/api/savings/user/${email}`)
         ]);
 
-        if (!expRes.ok || !incRes.ok || !budRes.ok || !savRes.ok) {
-          console.warn("⚠️ Some backend data not available yet");
-          return;
-        }
-
-        const [expData, incData, budData, savData] = await Promise.all([
-          expRes.json(),
-          incRes.json(),
-          budRes.json(),
-          savRes.json(),
+        const [exp, inc, bud, sav] = await Promise.all([
+          expR.json(),
+          incR.json(),
+          budR.json(),
+          savR.json()
         ]);
 
-        setExpenses(Array.isArray(expData) ? expData : []);
-        setIncomes(Array.isArray(incData) ? incData : []);
-        setBudgets(Array.isArray(budData) ? budData : []);
-        setSavings(Array.isArray(savData) ? savData : []);
+        setExpenses(Array.isArray(exp) ? exp : []);
+        setIncomes(Array.isArray(inc) ? inc : []);
+        setBudgets(Array.isArray(bud) ? bud : []);
+        setSavings(Array.isArray(sav) ? sav : []);
       } catch (err) {
-        console.error("❌ Error loading user data:", err);
+        console.error("❌ Error loading data:", err);
       }
     };
 
@@ -102,60 +79,25 @@ export const GlobalProvider = ({ children }) => {
   }, [user]);
 
   // --------------------------
-  // 🔹 Expense / Income / Budget / Savings logic
+  // 🔥 Add functions
   // --------------------------
   const addExpense = (expense) => {
-    const newExpense = { ...expense, id: Date.now() };
-    setExpenses((prev) => [...prev, newExpense]);
-
-    setNotifications((prev) => [
-      ...prev.slice(-4),
-      {
-        type: "expense",
-        message: `✅ Expense added: ${expense.category} (₹${expense.amount})`,
-      },
-    ]);
+    setExpenses((prev) => [...prev, expense]);
   };
 
   const addIncome = (income) => {
-    const newIncome = { ...income, id: Date.now() };
-    setIncomes((prev) => [...prev, newIncome]);
-
-    setNotifications((prev) => [
-      ...prev.slice(-4),
-      {
-        type: "success",
-        message: `💰 Income added: ${income.source} (₹${income.amount})`,
-      },
-    ]);
+    setIncomes((prev) => [...prev, income]);
   };
 
   const addBudget = (budget) => {
-    const newBudget = { ...budget, id: Date.now(), spent: 0 };
-    setBudgets((prev) => [...prev, newBudget]);
+    setBudgets((prev) => [...prev, budget]);
   };
 
   const addSaving = (saving) => {
-    const newSaving = {
-      id: saving.id || Date.now(),
-      goal: saving.goal,
-      targetAmount: parseFloat(saving.targetAmount || 0),
-      savedAmount: parseFloat(saving.savedAmount || 0),
-    };
-
-    setSavings((prev) => [...prev, newSaving]);
-    setNotifications((prev) => [
-      ...prev.slice(-4),
-      {
-        type: "info",
-        message: `💎 Saving added: ${saving.goal} (₹${newSaving.savedAmount} / ₹${newSaving.targetAmount})`,
-      },
-    ]);
+    setSavings((prev) => [...prev, saving]);
   };
 
   const addMoneyToSaving = (id, amount) => {
-    if (!amount) return;
-
     setSavings((prev) =>
       prev.map((s) =>
         s.id === id
@@ -163,61 +105,46 @@ export const GlobalProvider = ({ children }) => {
           : s
       )
     );
-
-    setNotifications((prev) => [
-      ...prev.slice(-4),
-      { type: "success", message: `💵 Added ₹${amount} to savings.` },
-    ]);
   };
 
   // --------------------------
-  // 🔹 Theme persistence (optional)
+  // 🔹 Theme
   // --------------------------
   useEffect(() => {
-    const savedColor = localStorage.getItem("themeColor");
-    if (savedColor) setThemeColor(savedColor);
+    const saved = localStorage.getItem("themeColor");
+    if (saved) setThemeColor(saved);
   }, []);
 
   useEffect(() => {
     localStorage.setItem("themeColor", themeColor);
   }, [themeColor]);
 
-  // --------------------------
-  // 🔹 Provide all states & actions globally
-  // --------------------------
   return (
     <GlobalContext.Provider
       value={{
-        // Expense
         expenses,
         setExpenses,
         addExpense,
 
-        // Income
         incomes,
         setIncomes,
         addIncome,
 
-        // Budget
         budgets,
         setBudgets,
         addBudget,
 
-        // Savings
         savings,
         setSavings,
         addSaving,
         addMoneyToSaving,
 
-        // UI / Theme
-        themeColor,
-        setThemeColor,
-
-        // Notifications
         notifications,
         setNotifications,
 
-        // User
+        themeColor,
+        setThemeColor,
+
         user,
         setUser,
       }}

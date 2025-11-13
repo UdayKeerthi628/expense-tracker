@@ -22,22 +22,25 @@ const AddExpense = () => {
     { label: "🏠 Rent", value: "rent" },
   ];
 
-  // ✅ Load user's expenses from backend when component mounts
+  // ================================
+  // ✅ Load user's expenses from backend
+  // ================================
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const userId = user?.id || "test-user"; // fallback for testing
+        if (!user?.email) return;
+
         const response = await fetch(
-          `http://localhost:8080/api/expenses?userId=${userId}`
+          `http://localhost:8080/api/expenses/user/${user.email}`
         );
 
         if (!response.ok) throw new Error("Failed to load expenses");
 
         const data = await response.json();
         setExpenses(data);
-        console.log("✅ Loaded expenses from backend:", data);
+        console.log("Loaded expenses:", data);
       } catch (error) {
-        console.error("❌ Error loading expenses:", error);
+        console.error("Error loading expenses:", error);
       }
     };
 
@@ -48,7 +51,9 @@ const AddExpense = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // ================================
   // ✅ Save new expense to backend
+  // ================================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,8 +71,6 @@ const AddExpense = () => {
     }
 
     try {
-      const userId = user?.id || "test-user"; // temporary static ID for now
-
       const response = await fetch("http://localhost:8080/api/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,25 +79,24 @@ const AddExpense = () => {
           amount: Number(formData.amount),
           category: formData.category,
           date: formData.date,
-          userId,
+          userEmail: user.email, // ✅ FIXED
         }),
       });
 
       if (!response.ok) throw new Error("Failed to save expense");
 
       const saved = await response.json();
-      console.log("✅ Saved to backend:", saved);
-
       addExpense(saved);
 
       setNotifications((prev) => [
         ...prev,
         {
           type: "success",
-          message: `✅ Added: ${saved.title} - ₹${saved.amount}`,
+          message: `Added: ${saved.title} - ₹${saved.amount}`,
         },
       ]);
 
+      // Reset form
       setFormData({
         title: "",
         amount: "",
@@ -102,7 +104,7 @@ const AddExpense = () => {
         date: "",
       });
     } catch (error) {
-      console.error("❌ Error saving expense:", error);
+      console.error("Error saving expense:", error);
       setNotifications((prev) => [
         ...prev,
         { type: "error", message: "❌ Failed to save expense." },
@@ -114,13 +116,6 @@ const AddExpense = () => {
     (acc, exp) => acc + Number(exp.amount || 0),
     0
   );
-
-  const categoryTotals = categories.map((cat) => {
-    const total = expenses
-      .filter((exp) => exp.category === cat.value)
-      .reduce((acc, exp) => acc + Number(exp.amount || 0), 0);
-    return { ...cat, total };
-  });
 
   const getCategoryEmoji = (value) => {
     const category = categories.find((cat) => cat.value === value);
@@ -198,30 +193,6 @@ const AddExpense = () => {
       {expenses.length > 0 && (
         <div className="total-spent">
           💰 Total Spent: <span>₹{totalSpent}</span>
-        </div>
-      )}
-
-      {expenses.length > 0 && (
-        <div className="category-breakdown">
-          <h3>Spending by Category</h3>
-          {categoryTotals.map(
-            (cat) =>
-              cat.total > 0 && (
-                <div key={cat.value} className="category-progress">
-                  <span>
-                    {cat.label}: ₹{cat.total}
-                  </span>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${(cat.total / totalSpent) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              )
-          )}
         </div>
       )}
     </div>

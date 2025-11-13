@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import "./Income.css";
 
 const Income = () => {
+
   const [incomes, setIncomes] = useState([]);
   const [source, setSource] = useState("");
   const [amount, setAmount] = useState("");
@@ -9,16 +10,26 @@ const Income = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Get logged-in user info
+  // ✅ Logged-in user (correct)
   const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user ? user.id || user.email || "test-user" : "test-user";
+  const userEmail = user ? user.email : null;
 
-  // ✅ Fetch incomes (GET method)
+  // ❗ If no user, stop loading
+  useEffect(() => {
+    if (!userEmail) {
+      setIncomes([]);
+    }
+  }, [userEmail]);
+
+  // ✅ Fetch incomes from backend (CORRECT URL)
   const fetchIncomes = useCallback(async () => {
+    if (!userEmail) return;
+
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/incomes?userId=${userId}`);
+      const res = await fetch(`http://localhost:8080/api/incomes/user/${userEmail}`);
       if (!res.ok) throw new Error("Failed to fetch incomes");
+
       const data = await res.json();
       setIncomes(data);
     } catch (err) {
@@ -27,26 +38,29 @@ const Income = () => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userEmail]);
 
+  // Load incomes on mount
   useEffect(() => {
     fetchIncomes();
   }, [fetchIncomes]);
 
-  // ✅ Add new income
+  // ================================
+  // 🚀 Add Income
+  // ================================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!source || !amount || !date) {
       setMessage("⚠️ Please fill all fields.");
       return;
     }
 
-    const formattedDate = new Date(date).toISOString().split("T")[0];
     const newIncome = {
       source,
       amount: Number(amount),
-      date: formattedDate,
-      userId,
+      date,
+      userEmail, // ✔ IMPORTANT
     };
 
     try {
@@ -60,17 +74,21 @@ const Income = () => {
 
       const saved = await res.json();
       setIncomes((prev) => [...prev, saved]);
+
       setMessage(`✅ Added income: ${source} - ₹${amount}`);
       setSource("");
       setAmount("");
       setDate("");
+
     } catch (err) {
       console.error(err);
       setMessage("❌ Error saving income.");
     }
   };
 
-  // ✅ Delete income
+  // ================================
+  // 🗑 Delete Income
+  // ================================
   const deleteIncome = async (id) => {
     if (!window.confirm("Are you sure you want to delete this income?")) return;
 
@@ -78,20 +96,20 @@ const Income = () => {
       await fetch(`http://localhost:8080/api/incomes/${id}`, {
         method: "DELETE",
       });
+
       setIncomes((prev) => prev.filter((i) => i.id !== id));
-      setMessage("🗑️ Income deleted successfully.");
+      setMessage("🗑 Income deleted.");
     } catch (err) {
       console.error(err);
       setMessage("⚠️ Unable to delete income.");
     }
   };
 
-  const totalIncome = incomes.reduce((acc, inc) => acc + Number(inc.amount || 0), 0);
-  const incomeBySource = incomes.reduce((acc, inc) => {
-    const src = inc.source || "Other";
-    acc[src] = (acc[src] || 0) + Number(inc.amount || 0);
-    return acc;
-  }, {});
+  // Total income
+  const totalIncome = incomes.reduce(
+    (acc, inc) => acc + Number(inc.amount || 0),
+    0
+  );
 
   return (
     <div className="income-container">
@@ -130,6 +148,7 @@ const Income = () => {
 
       <div className="recent-incomes">
         <h3>Recent Incomes</h3>
+
         {incomes.length === 0 ? (
           <p>No incomes yet.</p>
         ) : (
@@ -138,6 +157,7 @@ const Income = () => {
               <span>{inc.source}</span>
               <span>₹{inc.amount}</span>
               <span>{inc.date}</span>
+
               <button className="delete-btn" onClick={() => deleteIncome(inc.id)}>
                 ❌
               </button>
@@ -147,30 +167,9 @@ const Income = () => {
       </div>
 
       {incomes.length > 0 && (
-        <>
-          <div className="total-income">
-            💵 Total Income: <strong>₹{totalIncome}</strong>
-          </div>
-
-          <div className="income-breakdown">
-            <h3>By Source</h3>
-            {Object.entries(incomeBySource).map(([src, total], idx) => (
-              <div key={idx} className="income-progress">
-                <span>
-                  {src}: ₹{total}
-                </span>
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{
-                      width: `${totalIncome > 0 ? (total / totalIncome) * 100 : 0}%`,
-                    }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
+        <div className="total-income">
+          💵 Total Income: <strong>₹{totalIncome}</strong>
+        </div>
       )}
     </div>
   );

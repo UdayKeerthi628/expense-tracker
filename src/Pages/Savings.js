@@ -1,10 +1,9 @@
-// src/Pages/Savings.js
 import React, { useState, useContext, useEffect } from "react";
 import { GlobalContext } from "./GlobalContext";
 import "./Savings.css";
 
 const Savings = () => {
-  const { savings, setSavings } = useContext(GlobalContext);
+  const { savings, setSavings, user } = useContext(GlobalContext);
 
   const [goal, setGoal] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
@@ -12,33 +11,38 @@ const Savings = () => {
   const [editId, setEditId] = useState(null);
   const [addMoneyValue, setAddMoneyValue] = useState({});
 
-  // Load existing savings from backend on mount
+  // =========================================================
+  // 🔥 Load savings ONLY for logged-in user
+  // =========================================================
   useEffect(() => {
-    fetch("http://localhost:8080/api/savings")
+    if (!user?.email) return;
+
+    fetch(`http://localhost:8080/api/savings/user/${user.email}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch savings");
         return res.json();
       })
       .then((data) => setSavings(data))
-      .catch((err) => {
-        console.error("Error fetching savings:", err);
-        // keep local state if backend unreachable
-      });
-  }, [setSavings]);
+      .catch((err) => console.error("Error fetching savings:", err));
+  }, [user, setSavings]); // ✅ FIXED ESLINT WARNING
 
-  // Add or Update (sends to backend)
+  // =========================================================
+  // 🔥 Add or Update a saving
+  // =========================================================
   const addOrUpdateSaving = async (e) => {
     e.preventDefault();
     if (!goal || !targetAmount) return;
 
     const savingData = {
-      goal,
+      goal: goal.trim(),
       targetAmount: parseFloat(targetAmount),
-      savedAmount: 0,
+      savedAmount: isEditing ? undefined : 0,
+      userEmail: user.email,
     };
 
     try {
       let res;
+
       if (isEditing) {
         res = await fetch(`http://localhost:8080/api/savings/${editId}`, {
           method: "PUT",
@@ -53,10 +57,7 @@ const Savings = () => {
         });
       }
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`Save failed: ${res.status} ${txt}`);
-      }
+      if (!res.ok) throw new Error("Save failed");
 
       const saved = await res.json();
 
@@ -69,32 +70,40 @@ const Savings = () => {
       resetForm();
     } catch (err) {
       console.error("Error saving:", err);
-      alert("Error saving: " + err.message);
     }
   };
 
-  // Delete -> backend
+  // =========================================================
+  // 🔥 Delete saving
+  // =========================================================
   const deleteSaving = async (id) => {
     try {
       const res = await fetch(`http://localhost:8080/api/savings/${id}`, {
         method: "DELETE",
       });
+
       if (!res.ok) throw new Error("Delete failed");
+
       setSavings((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
       console.error("Error deleting:", err);
-      alert("Error deleting: " + err.message);
     }
   };
 
-  // Add money -> backend (updates savedAmount)
+  // =========================================================
+  // 🔥 Add money to saving
+  // =========================================================
   const addMoney = async (id, amount) => {
     if (!amount) return;
+
     try {
       const saving = savings.find((s) => s.id === id);
-      if (!saving) throw new Error("Saving not found");
 
-      const updated = { ...saving, savedAmount: (saving.savedAmount || 0) + parseFloat(amount) };
+      const updated = {
+        ...saving,
+        savedAmount: (saving.savedAmount || 0) + parseFloat(amount),
+        userEmail: user.email,
+      };
 
       const res = await fetch(`http://localhost:8080/api/savings/${id}`, {
         method: "PUT",
@@ -102,17 +111,14 @@ const Savings = () => {
         body: JSON.stringify(updated),
       });
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`Update failed: ${res.status} ${txt}`);
-      }
+      if (!res.ok) throw new Error("Update failed");
 
       const updatedData = await res.json();
+
       setSavings((prev) => prev.map((s) => (s.id === id ? updatedData : s)));
       setAddMoneyValue((prev) => ({ ...prev, [id]: "" }));
     } catch (err) {
-      console.error("Error updating saving:", err);
-      alert("Error updating saving: " + err.message);
+      console.error("Error updating:", err);
     }
   };
 
@@ -132,7 +138,8 @@ const Savings = () => {
 
   const totalTarget = savings.reduce((sum, s) => sum + (s.targetAmount || 0), 0);
   const totalSaved = savings.reduce((sum, s) => sum + (s.savedAmount || 0), 0);
-  const overallProgress = totalTarget > 0 ? Math.min((totalSaved / totalTarget) * 100, 100) : 0;
+  const overallProgress =
+    totalTarget > 0 ? Math.min((totalSaved / totalTarget) * 100, 100) : 0;
 
   return (
     <div className="savings-page">
@@ -140,14 +147,13 @@ const Savings = () => {
         <h2>💰 Your Savings Goals</h2>
 
         <div className="savings-summary">
-          Total Saved: ₹{totalSaved.toLocaleString()} / ₹{totalTarget.toLocaleString()} (
-          {overallProgress.toFixed(1)}%)
+          Total Saved: ₹{totalSaved} / ₹{totalTarget} ({overallProgress.toFixed(1)}%)
         </div>
 
         <form className="savings-form" onSubmit={addOrUpdateSaving}>
           <input
             type="text"
-            placeholder="Enter goal (e.g., New Bike)"
+            placeholder="Enter goal"
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
           />
@@ -157,10 +163,13 @@ const Savings = () => {
             value={targetAmount}
             onChange={(e) => setTargetAmount(e.target.value)}
           />
+
           <div className="button-row">
-            <button type="submit">{isEditing ? "Update Saving" : "Add Saving"}</button>
+            <button type="submit">
+              {isEditing ? "Update Saving" : "Add Saving"}
+            </button>
             {isEditing && (
-              <button type="button" className="cancel-btn" onClick={resetForm}>
+              <button className="cancel-btn" onClick={resetForm}>
                 Cancel
               </button>
             )}
@@ -173,8 +182,9 @@ const Savings = () => {
           ) : (
             <ul>
               {savings.map((s) => {
-                const progress = s.targetAmount ? Math.min((s.savedAmount / s.targetAmount) * 100, 100) : 0;
-                const color = progress < 40 ? "#ff4d6d" : progress < 80 ? "#f9ca24" : "#43cea2";
+                const progress = s.targetAmount
+                  ? Math.min((s.savedAmount / s.targetAmount) * 100, 100)
+                  : 0;
 
                 return (
                   <li key={s.id} className="saving-item">
@@ -183,26 +193,37 @@ const Savings = () => {
                         <strong>{s.goal}</strong>
                         <span>
                           — ₹{s.savedAmount} / ₹{s.targetAmount}{" "}
-                          {s.savedAmount >= s.targetAmount && "✅ Goal Achieved!"}
+                          {s.savedAmount >= s.targetAmount && "🎉 Goal Reached!"}
                         </span>
                       </div>
                       <span>{progress.toFixed(1)}%</span>
                     </div>
 
                     <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${progress}%`, background: color }}></div>
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${progress}%`, background: "#4caf50" }}
+                      ></div>
                     </div>
 
                     <div className="saving-actions">
                       <button onClick={() => editSaving(s)}>Edit</button>
                       <button onClick={() => deleteSaving(s.id)}>Delete</button>
+
                       <input
                         type="number"
                         placeholder="Add ₹"
                         value={addMoneyValue[s.id] || ""}
-                        onChange={(e) => setAddMoneyValue((prev) => ({ ...prev, [s.id]: e.target.value }))}
+                        onChange={(e) =>
+                          setAddMoneyValue((prev) => ({
+                            ...prev,
+                            [s.id]: e.target.value,
+                          }))
+                        }
                       />
-                      <button onClick={() => addMoney(s.id, addMoneyValue[s.id])}>Add Money</button>
+                      <button onClick={() => addMoney(s.id, addMoneyValue[s.id])}>
+                        Add Money
+                      </button>
                     </div>
                   </li>
                 );
